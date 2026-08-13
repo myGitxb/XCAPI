@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>星辰 API（new-api）使用文档</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --panel:#ffffff; --ink:#1f2733; --muted:#6b7686;
+    --line:#e6e9ef; --brand:#2f6df6; --brand-soft:#eaf1ff;
+    --code-bg:#f3f5f9; --ok:#1a9e6c; --warn:#e0a200; --err:#d8453a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; font-size:15px;
+  }
+  a{color:var(--brand); text-decoration:none}
+  a:hover{text-decoration:underline}
+  .layout{display:flex; min-height:100vh; max-width:1280px; margin:0 auto}
+  /* sidebar */
+  .sidebar{
+    width:260px; flex:none; background:var(--panel); border-right:1px solid var(--line);
+    position:sticky; top:0; align-self:flex-start; height:100vh; overflow-y:auto; padding:22px 16px;
+  }
+  .sidebar .logo{font-weight:700; font-size:16px; margin:0 0 4px}
+  .sidebar .sub{color:var(--muted); font-size:12px; margin-bottom:18px}
+  .sidebar nav a{
+    display:block; padding:6px 10px; border-radius:8px; color:var(--ink); font-size:13.5px;
+  }
+  .sidebar nav a:hover{background:var(--brand-soft); text-decoration:none}
+  .sidebar nav a.lvl2{padding-left:22px; font-size:13px; color:var(--muted)}
+  .sidebar nav a.active{background:var(--brand-soft); color:var(--brand); font-weight:600}
+  /* main */
+  .main{flex:1; padding:36px 44px 80px; min-width:0}
+  .hero{
+    background:linear-gradient(135deg,#2f6df6,#5b9bff); color:#fff; border-radius:14px;
+    padding:26px 28px; margin-bottom:28px;
+  }
+  .hero h1{margin:0 0 6px; font-size:24px}
+  .hero p{margin:0; opacity:.92; font-size:13.5px}
+  h2{font-size:21px; margin:38px 0 14px; padding-top:10px; border-top:1px solid var(--line)}
+  h2:first-of-type{border-top:none}
+  h3{font-size:16.5px; margin:26px 0 10px; color:#22324a}
+  h4{font-size:14.5px; margin:18px 0 8px; color:var(--brand)}
+  p{margin:10px 0}
+  code{
+    background:var(--code-bg); padding:2px 6px; border-radius:5px; font-size:13px;
+    font-family:"SFMono-Regular",Consolas,Menlo,monospace; color:#b5344b;
+  }
+  pre{
+    background:#1e2532; color:#e6edf3; padding:16px 18px; border-radius:10px; overflow:auto;
+    font-size:13px; line-height:1.55; margin:12px 0;
+  }
+  pre code{background:none; color:inherit; padding:0}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:13.5px}
+  th,td{border:1px solid var(--line); padding:8px 12px; text-align:left; vertical-align:top}
+  th{background:var(--brand-soft); color:#22324a; font-weight:600}
+  tr:nth-child(even) td{background:#fbfcfe}
+  blockquote{
+    border-left:4px solid var(--brand); background:var(--brand-soft); margin:12px 0;
+    padding:10px 16px; border-radius:0 8px 8px 0; color:#22324a; font-size:13.5px;
+  }
+  .badge{display:inline-block; background:var(--brand-soft); color:var(--brand); font-size:12px;
+    padding:1px 8px; border-radius:999px; margin-right:6px}
+  .card-grid{display:flex; gap:14px; flex-wrap:wrap; margin:14px 0}
+  .card{flex:1; min-width:200px; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:14px 16px}
+  .card .k{color:var(--muted); font-size:12px}
+  .card .v{font-size:14px; font-weight:600; word-break:break-all}
+  ul,ol{padding-left:22px}
+  li{margin:5px 0}
+  .footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12.5px}
+  .topbar{display:none}
+  .shot{
+    border:2px dashed var(--brand); background:var(--brand-soft); border-radius:10px;
+    padding:14px 16px; margin:14px 0; color:#244; font-size:13px;
+  }
+  .shot b{color:var(--brand)}
+  .shot img{display:block; max-width:100%; border-radius:8px; margin-top:8px; border:1px solid var(--line)}
+  .shot .cap{margin-top:6px; color:var(--muted); font-size:12px}
+  @media (max-width:860px){
+    .layout{flex-direction:column}
+    .sidebar{position:static; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--line)}
+    .main{padding:24px 18px 60px}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">星辰 API 使用文档</div>
+    <div class="sub">new-api 中转服务 · 最后更新 2026-07-19</div>
+    <nav id="toc">
+      <a href="#s1">1. 服务概览</a>
+      <a href="#s2">2. 获取 API Key</a>
+      <a href="#s3">3. 可用模型与分组</a>
+      <a href="#s4">4. 客户端配置</a>
+      <a href="#s4-1" class="lvl2">4.1 MiMo Code</a>
+      <a href="#s4-2" class="lvl2">4.2 OpenCode</a>
+      <a href="#s4-3" class="lvl2">4.3 Claude Code</a>
+      <a href="#s4-3-1" class="lvl2">4.3.1 + CC-Switch</a>
+      <a href="#s4-4" class="lvl2">4.4 OpenAI Codex</a>
+      <a href="#s4-5" class="lvl2">4.5 OpenClaw</a>
+      <a href="#s4-6" class="lvl2">4.6 Hermes Agent</a>
+      <a href="#s4-7" class="lvl2">4.7 Kilo Code</a>
+      <a href="#s4-8" class="lvl2">4.8 Cherry Studio</a>
+      <a href="#s4-9" class="lvl2">4.9 Qwen Code</a>
+      <a href="#s4-10" class="lvl2">4.10 CodeBuddy</a>
+      <a href="#s4-11" class="lvl2">4.11 Cline</a>
+      <a href="#s4-12" class="lvl2">4.12 其他通用客户端</a>
+      <a href="#s5">5. 连通性测试</a>
+      <a href="#s6">6. 常见问题</a>
+      <a href="#s7">7. 注意事项</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="hero">
+      <h1>星辰 API（new-api）使用文档</h1>
+      <p>本站在各类 AI 编程客户端（Claude Code / Codex / OpenCode 等）中调用模型的使用说明。</p>
+    </div>
+
+    <h2 id="s1">1. 服务概览</h2>
+    <div class="card-grid">
+      <div class="card"><div class="k">服务地址 / API Base</div><div class="v">https://api.66zyw.cn</div></div>
+      <div class="card"><div class="k">OpenAI 兼容接口</div><div class="v">https://api.66zyw.cn/v1</div></div>
+      <div class="card"><div class="k">Anthropic 接口（Claude）</div><div class="v">https://api.66zyw.cn/v1/messages</div></div>
+    </div>
+    <p>本站是 <b>OpenAI API 与 Anthropic API 双兼容</b>的中转网关，因此几乎所有主流 AI 客户端只需改两处：<b>API Base URL</b> 和 <b>API Key</b>，即可直接使用。</p>
+
+    <h2 id="s2">2. 获取 API Key</h2>
+    <ol>
+      <li>打开控制台：<a href="https://api.66zyw.cn" target="_blank">https://api.66zyw.cn</a></li>
+      <li>注册 / 登录账号。</li>
+      <li>进入 <b>用户中心 → 令牌（API Key）</b> 页面，点击「新建令牌 / 创建密钥」。</li>
+      <li>填写名称、额度上限（可选），<b>在分组（Group）中选择你套餐对应的分组</b>（见第 3 节）。</li>
+      <li>创建后会得到一串 <code>sk-</code> 开头的密钥，<b>请立即复制保存</b>（只显示一次）。</li>
+    </ol>
+    <blockquote>⚠️ 令牌的分组决定它走哪条上游渠道与对应倍率。选错分组可能用不到你购买的额度或走错价位，请按你实际开通的分组选择。</blockquote>
+
+    <div class="shot">
+      <b>图 1：控制台概览</b> — 登录后进入控制台，左侧可看到「API 密钥」「使用日志」「渠道」等入口。
+      <img src="screenshots/01-home.png" alt="控制台概览">
+    </div>
+    <div class="shot">
+      <b>图 2：API 密钥列表</b> — 进入「API 密钥」页面，可查看已有密钥、状态、分组与额度。
+      <img src="screenshots/02-tokens.png" alt="API 密钥列表">
+    </div>
+    <div class="shot">
+      <b>图 3：创建 API 密钥（第一步）</b> — 点击「创建 API 密钥」，弹出空白表单。
+      <img src="screenshots/03a-token-modal-open.png" alt="创建 API 密钥空白弹窗">
+    </div>
+    <div class="shot">
+      <b>图 4：填写表单（第二步）</b> — 输入名称，并在「分组」中选择你的套餐分组（如 <code>default</code>），然后点击「保存更改」。
+      <img src="screenshots/03b-token-modal-filled.png" alt="填写名称并选择分组">
+    </div>
+    <div class="shot">
+      <b>图 5：创建成功（第三步）</b> — 提交后系统提示「成功创建了 1 个 API 密钥」，列表中会出现新的密钥。点击右侧复制按钮即可获取完整 <code>sk-</code> 密钥。
+      <img src="screenshots/03c-token-created.png" alt="创建 API 密钥成功">
+    </div>
+
+    <h2 id="s3">3. 可用模型与分组</h2>
+    <h3>3.1 模型名（请求时填到 <code>model</code> 字段）</h3>
+    <p><span class="badge">Claude 系列</span></p>
+    <ul>
+      <li><code>claude-opus-4-6</code></li>
+      <li><code>claude-opus-4-7</code></li>
+      <li><code>claude-sonnet-4-6</code></li>
+      <li><code>claude-sonnet-5</code></li>
+      <li><code>claude-fable-5</code></li>
+    </ul>
+    <p><span class="badge">GPT / Codex 系列</span></p>
+    <ul>
+      <li><code>gpt-5.4</code></li>
+      <li><code>gpt-5.5</code></li>
+      <li><code>gpt-5.6</code></li>
+      <li><code>gpt-5.6-luna</code> / <code>gpt-5.6-sol</code> / <code>gpt-5.6-terra</code>（混池变体）</li>
+      <li><code>codex-auto-review</code></li>
+    </ul>
+    <p><span class="badge">其他</span></p>
+    <ul><li><code>grok-4.5</code></li></ul>
+
+    <h3>3.2 分组（Group，决定路由与倍率）</h3>
+    <p>令牌可绑定的分组包括：<code>default</code>、<code>pro</code>、<code>grok</code>、<code>Codex-Plus-Pro混池</code>、<code>kiro高缓</code>、<code>特惠gpt</code> 等。不同分组对应不同的上游渠道与计费倍率，请按你的套餐选择对应分组。</p>
+    <blockquote>组别与具体倍率以控制台实际显示为准。不确定时用哪个分组，先用 <code>default</code> 测试连通性，再切换到你的专属分组。</blockquote>
+
+    <div class="shot">
+      <b>图 6：模型调用分析</b> — 控制台「数据看板 → 模型调用分析」可查看本站当前可用模型与实时调用统计。
+      <img src="screenshots/04-models.png" alt="模型调用分析">
+    </div>
+    <div class="shot">
+      <b>图 7：分组与倍率</b> — 创建 API 密钥时点击「分组」下拉，可看到各分组及其计费倍率（如 <code>pro 0.2x</code>、<code>grok 0.04x</code>、<code>kiro高缓 0.1x</code> 等）。按你购买的套餐选择对应分组即可。
+      <img src="screenshots/05-group-dropdown.png" alt="分组下拉与倍率">
+    </div>
+
+    <h2 id="s4">4. 客户端配置</h2>
+    <p>下面所有示例里的 <code>sk-xxxxxx</code> 都替换成你在第 2 节拿到的真实密钥。</p>
+
+    <h3 id="s4-1">4.1 MiMo Code 配置</h3>
+    <p>MiMo Code 支持 OpenAI 兼容协议，在设置里选择「OpenAI 兼容」或「自定义端点」即可。</p>
+    <p><b>配置项：</b></p>
+    <ul>
+      <li><b>API Base URL</b>：<code>https://api.66zyw.cn/v1</code></li>
+      <li><b>API Key</b>：<code>sk-xxxxxx</code></li>
+      <li><b>模型</b>：<code>gpt-5.6</code> / <code>claude-opus-4-7</code> 等（见 3.1）</li>
+    </ul>
+    <p><b>方式 A：环境变量（若客户端支持）</b></p>
+    <pre><code>export OPENAI_API_KEY="sk-xxxxxx"
+export OPENAI_BASE_URL="https://api.66zyw.cn/v1"</code></pre>
+    <p><b>方式 B：图形界面设置</b></p>
+    <p>进入 MiMo Code → 设置 → 模型提供方 → 选择「OpenAI 兼容 / Custom OpenAI」，填入上述 Base URL 和 Key，并选择模型。</p>
+    <blockquote>注意：MiMo Code 不同版本对自定义端点的字段名可能叫 <code>Base URL</code>、<code>API Host</code>、<code>Endpoint</code> 等，含义相同。</blockquote>
+
+    <h3 id="s4-2">4.2 OpenCode 配置</h3>
+    <p>OpenCode 走 OpenAI 兼容协议，配置 <code>opencode.json</code> 即可。</p>
+    <p><b>调用 GPT 系列（OpenAI 兼容提供方）：</b></p>
+    <pre><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "openai": {
+      "baseURL": "https://api.66zyw.cn/v1",
+      "apiKey": "sk-xxxxxx",
+      "models": [
+        { "id": "gpt-5.6", "name": "GPT-5.6" },
+        { "id": "gpt-5.5", "name": "GPT-5.5" }
+      ]
+    }
+  }
+}</code></pre>
+    <p><b>调用 Claude 系列（走 Anthropic 提供方，指向本站 /v1/messages）：</b></p>
+    <pre><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "anthropic": {
+      "baseURL": "https://api.66zyw.cn",
+      "apiKey": "sk-xxxxxx",
+      "models": [
+        { "id": "claude-opus-4-7", "name": "Claude Opus 4.7" },
+        { "id": "claude-sonnet-5", "name": "Claude Sonnet 5" }
+      ]
+    }
+  }
+}</code></pre>
+    <blockquote>因为本站同时暴露 OpenAI 与 Anthropic 两种格式，Claude 模型用上面任一提供方配置都能跑通（Anthropic 提供方走 <code>/v1/messages</code>，OpenAI 提供方走 <code>/v1/chat/completions</code>）。</blockquote>
+
+    <h3 id="s4-3">4.3 Claude Code 配置</h3>
+    <p>Claude Code 原生使用 Anthropic 格式，直接指向本站即可。</p>
+    <p><b>方式 A：环境变量（推荐，最简单）</b></p>
+    <pre><code>export ANTHROPIC_BASE_URL="https://api.66zyw.cn"
+export ANTHROPIC_API_KEY="sk-xxxxxx"</code></pre>
+    <p>设置后直接运行 <code>claude</code> 即可。如需指定模型，可加：</p>
+    <pre><code>export ANTHROPIC_MODEL="claude-opus-4-7"
+# 或在 Claude Code 交互里用 /model 切换</code></pre>
+    <p><b>方式 B：写入 Claude Code 配置（settings.json）</b></p>
+    <pre><code>{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.66zyw.cn",
+    "ANTHROPIC_API_KEY": "sk-xxxxxx"
+  }
+}</code></pre>
+    <blockquote>注意：Claude Code 默认模型名需本站支持（见 3.1）。若启动报模型不存在，用 <code>/model</code> 切到 <code>claude-opus-4-7</code> / <code>claude-sonnet-5</code> 等可用模型。ANTHROPIC_BASE_URL 不要带 <code>/v1</code>，Claude Code 会自动补 <code>/v1/messages</code>。</blockquote>
+
+    <h4 id="s4-3-1">4.3.1 Claude Code + CC-Switch（图形化一键配置）</h4>
+    <blockquote>前置：先在本站中转后台创建 <b>Claude Code 专用分组</b>的令牌（见第 2 节），创建成功后会显示在 API 密钥列表中。</blockquote>
+
+    <p><b>方式 A：控制台一键导入（推荐）</b></p>
+    <p>new-api 控制台已内置 CC-Switch 快捷入口，无需手动复制粘贴：</p>
+    <ol>
+      <li>进入 <b>API 密钥</b> 列表，找到你创建的 Claude 分组令牌。</li>
+      <li>点击右侧「操作」列的 ⋯ 下拉菜单，选择 <b>「CC Switch」</b>。</li>
+      <li>在弹出的「填入 CC Switch」窗口中：
+        <ul>
+          <li><b>应用</b>：选择 <code>Claude</code>（或 Codex / Gemini）。</li>
+          <li><b>名称</b>：给这条配置起个名字（如 <code>My Claude</code>）。</li>
+          <li><b>主模型 / Haiku / Sonnet / Opus 模型</b>：按需选择对应模型（见 3.1）。</li>
+        </ul>
+      </li>
+      <li>点击 <b>「打开 CC Switch」</b>，系统会自动把密钥和端点写入 CC-Switch。</li>
+      <li>⚠️ <b>务必在 CC-Switch 的环境变量编辑区追加一行</b>：
+        <pre><code>CLAUDE_CODE_ATTRIBUTION_HEADER=0</code></pre>
+        这是接入第三方中转 API 时<b>最关键的缓存优化开关</b>——不设的话，Claude Code 2.1.36+ 注入的动态归因标识会让约 6.8 万 tokens 的 system prompt 每次都缓存失败，实测费用暴涨约 10 倍、首包延迟从 2 秒变 17 秒。关闭后对功能无任何副作用。
+      </li>
+      <li>添加成功后主界面显示该分组，点右侧「启用」→ 显示「使用中」即完成。</li>
+      <li>点左上角「设置」→ 通用页下拉找到 <code>跳过 Claude Code 初次安装确认</code>，<b>务必勾选</b>。</li>
+      <li>终端运行 <code>claude</code>，能正常回复即配置完成。</li>
+    </ol>
+
+    <div class="shot">
+      <b>图 8：API 密钥 → 操作菜单 → CC Switch</b> — 在密钥列表右侧点击 ⋯，选择「CC Switch」一键导入。
+      <img src="screenshots/06-ccswitch-menu.png" alt="API 密钥操作菜单中的 CC Switch 入口">
+    </div>
+    <div class="shot">
+      <b>图 9：填入 CC Switch</b> — 选择应用（Claude）、填写名称、选择主模型与各类模型，点击「打开 CC Switch」完成写入。
+      <img src="screenshots/07-ccswitch-fill.png" alt="填入 CC Switch 弹窗">
+    </div>
+
+    <p><b>方式 B：手动配置（备用）</b></p>
+    <p>如果一键导入不可用，也可以手动复制 API Key 到 CC-Switch：打开 CC-Switch → 分组条选 <code>「Claude」</code> → 供应商分组选 <code>「自定义配置」</code> → 粘贴 Key → 选择模型 → 在环境变量里追加 <code>CLAUDE_CODE_ATTRIBUTION_HEADER=0</code>。</p>
+
+    <p><b>Claude 系列分组选择建议（仅 Claude 相关）：</b></p>
+    <table>
+      <tr><th>分组</th><th>倍率</th><th>适合场景</th><th>能否接 CC-Switch</th></tr>
+      <tr><td><code>Kiro-Claude-高缓存</code></td><td>x0.2</td><td>Claude Code 日常主力，性价比最高</td><td>✅ 支持第三方接入</td></tr>
+      <tr><td><code>claude-awsq-满血</code></td><td>x0.6</td><td>95% 高缓存，稳定与性价比兼顾</td><td>✅ 支持第三方接入</td></tr>
+      <tr><td><code>claude-max-满血</code></td><td>x1（VIP x0.9 / Premium x0.8）</td><td>官方满血 20x，最高稳定</td><td>❌ 仅供 Claude Code 工具调用，不可外接到 CC-Switch</td></tr>
+    </table>
+    <blockquote>推荐顺序：日常先用 <code>Kiro-Claude-高缓存</code>；长任务/缓存命中率要求高时切 <code>claude-awsq-满血</code>；只在 Claude Code 工具内用最高档时切 <code>claude-max-满血</code>。具体分组与倍率以控制台「模型广场」实时显示为准。</blockquote>
+
+    <h3 id="s4-4">4.4 OpenAI Codex（codex CLI）配置</h3>
+    <p>Codex 使用 OpenAI 兼容接口，Base URL 指向 <code>/v1</code>。</p>
+    <p><b>方式 A：配置文件 <code>~/.codex/config.toml</code></b></p>
+    <pre><code>model = "gpt-5.6"
+
+[model_providers.openai]
+base_url = "https://api.66zyw.cn/v1"
+api_key = "sk-xxxxxx"</code></pre>
+    <p>然后运行：<code>codex</code>（默认用上面配置的 <code>gpt-5.6</code>），或指定模型 <code>codex --model gpt-5.5</code>。</p>
+    <p><b>方式 B：环境变量</b></p>
+    <pre><code>export OPENAI_API_KEY="sk-xxxxxx"
+export OPENAI_BASE_URL="https://api.66zyw.cn/v1"
+codex</code></pre>
+    <blockquote>不同 Codex 版本的 <code>config.toml</code> 字段名可能略有差异（如 <code>base_url</code> / <code>baseUrl</code>），以你本地 <code>codex --help</code> 与官方文档为准。环境变量的方式兼容性最好。</blockquote>
+
+    <h3 id="s4-5">4.5 OpenClaw 配置</h3>
+    <p>OpenClaw 是 OpenAI 兼容的 AI 编程助手，配置方式与 Cline 类似。</p>
+    <p><b>方式 A：设置界面</b></p>
+    <ul>
+      <li>Provider / API Provider：选择 <code>OpenAI Compatible</code> 或 <code>Custom</code></li>
+      <li>Base URL：<code>https://api.66zyw.cn/v1</code></li>
+      <li>API Key：<code>sk-xxxxxx</code></li>
+      <li>Model：<code>gpt-5.6</code> 或 <code>claude-opus-4-7</code></li>
+    </ul>
+    <p><b>方式 B：配置文件（若支持）</b></p>
+    <pre><code>{
+  "apiProvider": "openai-compatible",
+  "openAiCompatibleBaseUrl": "https://api.66zyw.cn/v1",
+  "openAiCompatibleApiKey": "sk-xxxxxx",
+  "model": "gpt-5.6"
+}</code></pre>
+    <blockquote>具体字段名以 OpenClaw 版本为准，核心是设置 OpenAI 兼容的 Base URL 与 Key。</blockquote>
+
+    <h3 id="s4-6">4.6 Hermes Agent 配置</h3>
+    <p>Hermes Agent 通常通过环境变量读取 OpenAI 兼容端点。</p>
+    <pre><code>export OPENAI_API_KEY="sk-xxxxxx"
+export OPENAI_BASE_URL="https://api.66zyw.cn/v1"
+export OPENAI_MODEL="gpt-5.6"
+# 若 Hermes 支持模型名独立变量，如 HERMES_MODEL，也请一并设置</code></pre>
+    <p>然后运行 <code>hermes</code> 或 <code>hermes-agent</code> 相关命令即可。</p>
+    <p>若 Hermes 使用配置文件（如 <code>~/.hermes/config.yaml</code>）：</p>
+    <pre><code>llm:
+  provider: openai
+  base_url: https://api.66zyw.cn/v1
+  api_key: sk-xxxxxx
+  model: gpt-5.6</code></pre>
+    <blockquote>具体字段名（<code>base_url</code> / <code>baseUrl</code> / <code>api_host</code>）请参照 Hermes 版本文档。</blockquote>
+
+    <h3 id="s4-7">4.7 Kilo Code 配置</h3>
+    <p>Kilo Code 支持 OpenAI 兼容协议，配置方式与主流 VS Code AI 插件类似。</p>
+    <p><b>VS Code 设置（settings.json）：</b></p>
+    <pre><code>{
+  "kiloCode.provider": "openai-compatible",
+  "kiloCode.openAiCompatible.baseUrl": "https://api.66zyw.cn/v1",
+  "kiloCode.openAiCompatible.apiKey": "sk-xxxxxx",
+  "kiloCode.model": "gpt-5.6"
+}</code></pre>
+    <p>或在 Kilo Code 插件面板中：</p>
+    <ol>
+      <li>打开 Kilo Code 侧边栏 → 设置</li>
+      <li>Provider 选择 <code>OpenAI Compatible</code> / <code>Custom</code></li>
+      <li>Base URL 填 <code>https://api.66zyw.cn/v1</code></li>
+      <li>API Key 填 <code>sk-xxxxxx</code></li>
+      <li>Model 选择或手动输入 <code>gpt-5.6</code></li>
+    </ol>
+    <blockquote>字段名可能因版本不同而叫 <code>baseUrl</code>、<code>base_url</code>、<code>apiHost</code> 等，请按实际界面填写。</blockquote>
+
+    <h3 id="s4-8">4.8 Cherry Studio 配置</h3>
+    <p>Cherry Studio 是桌面端多模型客户端，支持自定义 OpenAI 兼容服务商。</p>
+    <ol>
+      <li>打开 Cherry Studio → 设置（Settings）→ 模型服务商（Models / Providers）</li>
+      <li>点击「添加服务商」或「OpenAI 兼容」</li>
+      <li>填写：
+        <ul>
+          <li><b>名称</b>：星辰 API（任意）</li>
+          <li><b>API 地址 / Base URL</b>：<code>https://api.66zyw.cn/v1</code></li>
+          <li><b>API 密钥 / API Key</b>：<code>sk-xxxxxx</code></li>
+        </ul>
+      </li>
+      <li>保存后，在模型列表中添加自定义模型：<code>gpt-5.6</code>、<code>claude-opus-4-7</code>、<code>grok-4.5</code>、其他见 3.1</li>
+      <li>新建对话时选择该服务商下的模型即可。</li>
+    </ol>
+    <blockquote>Cherry Studio 通常要求模型 ID 与服务端一致，直接填写 3.1 中的模型名即可。</blockquote>
+
+    <h3 id="s4-9">4.9 Qwen Code 配置</h3>
+    <p>Qwen Code（通义灵码等阿里系 AI 编程工具）支持接入自定义 OpenAI 兼容模型。</p>
+    <p><b>IDE 插件设置：</b></p>
+    <ol>
+      <li>打开 Qwen Code 插件 → 设置 → 模型配置 / 自定义模型</li>
+      <li>选择「OpenAI 兼容」或「自定义 Endpoint」</li>
+      <li>填写：
+        <ul>
+          <li><b>Base URL</b>：<code>https://api.66zyw.cn/v1</code></li>
+          <li><b>API Key</b>：<code>sk-xxxxxx</code></li>
+          <li><b>模型</b>：<code>gpt-5.6</code> / <code>claude-opus-4-7</code></li>
+        </ul>
+      </li>
+    </ol>
+    <p><b>环境变量方式（若支持）：</b></p>
+    <pre><code>export OPENAI_API_KEY="sk-xxxxxx"
+export OPENAI_API_BASE="https://api.66zyw.cn/v1"
+export OPENAI_MODEL="gpt-5.6"</code></pre>
+    <blockquote>不同版本入口可能叫「自定义模型」、「私有模型」、「第三方模型」，找到 OpenAI 兼容入口即可。</blockquote>
+
+    <h3 id="s4-10">4.10 CodeBuddy 配置</h3>
+    <p>CodeBuddy（即 WorkBuddy 的 Code 能力）接入本站时，走 OpenAI 兼容协议。</p>
+    <p><b>方式 A：环境变量</b></p>
+    <pre><code>export OPENAI_API_KEY="sk-xxxxxx"
+export OPENAI_BASE_URL="https://api.66zyw.cn/v1"</code></pre>
+    <p><b>方式 B：配置文件（如 <code>opencode.json</code> 或 CodeBuddy 设置文件）</b></p>
+    <pre><code>{
+  "provider": {
+    "openai": {
+      "baseURL": "https://api.66zyw.cn/v1",
+      "apiKey": "sk-xxxxxx",
+      "models": [
+        { "id": "gpt-5.6", "name": "GPT-5.6" },
+        { "id": "claude-opus-4-7", "name": "Claude Opus 4.7" }
+      ]
+    }
+  }
+}</code></pre>
+    <blockquote>CodeBuddy 内部可能同时支持 OpenAI 与 Anthropic 两种格式，Claude 模型也可以按 Anthropic 方式配置：<code>baseURL=https://api.66zyw.cn</code>（不带 <code>/v1</code>），<code>apiKey=sk-xxxxxx</code>。</blockquote>
+
+    <h3 id="s4-11">4.11 Cline 配置</h3>
+    <p>Cline（VS Code 插件）支持 OpenAI 兼容 provider，通过 VS Code 设置或 UI 配置。</p>
+    <p><b>方式 A：VS Code settings.json</b></p>
+    <pre><code>{
+  "cline.provider": "openai-compatible",
+  "cline.openAiCompatible.baseUrl": "https://api.66zyw.cn/v1",
+  "cline.openAiCompatible.apiKey": "sk-xxxxxx",
+  "cline.model": "gpt-5.6"
+}</code></pre>
+    <p><b>方式 B：Cline 侧边栏 UI</b></p>
+    <ol>
+      <li>打开 Cline 扩展面板</li>
+      <li>点击设置（齿轮 / Settings）</li>
+      <li>API Provider 选择 <code>OpenAI Compatible</code></li>
+      <li>Base URL 填：<code>https://api.66zyw.cn/v1</code></li>
+      <li>API Key 填：<code>sk-xxxxxx</code></li>
+      <li>Model ID 填：<code>gpt-5.6</code> 或 <code>claude-opus-4-7</code></li>
+    </ol>
+    <blockquote>Cline 不同版本字段名可能为 <code>baseUrl</code> / <code>base_url</code> / <code>apiHost</code>，请按实际版本填写。若 Cline 支持 Anthropic provider，也可按 Claude Code 的方式配置（Base URL 不带 <code>/v1</code>）。</blockquote>
+
+    <h3 id="s4-12">4.12 其他 OpenAI 兼容客户端（通用配方）</h3>
+    <p>只要客户端支持「自定义 OpenAI Base URL」，套用下面这个<b>通用配方</b>即可：</p>
+    <ul>
+      <li><b>Base URL</b>：<code>https://api.66zyw.cn/v1</code></li>
+      <li><b>API Key</b>：<code>sk-xxxxxx</code></li>
+      <li><b>模型名</b>：填 3.1 中的任意一个</li>
+    </ul>
+    <table>
+      <tr><th>客户端</th><th>配置位置</th></tr>
+      <tr><td><b>Cursor</b></td><td>Settings → Models → Override OpenAI Base URL = <code>https://api.66zyw.cn/v1</code>，填入 Key</td></tr>
+      <tr><td><b>Roo Code（VS Code 插件）</b></td><td>provider 选 <code>OpenAI Compatible</code>，Base URL = <code>https://api.66zyw.cn/v1</code>，填 Key</td></tr>
+      <tr><td><b>Aider</b></td><td><code>export OPENAI_API_KEY=sk-xxxxxx; export OPENAI_API_BASE=https://api.66zyw.cn/v1</code>，再 <code>aider --model gpt-5.6</code></td></tr>
+      <tr><td><b>Continue（VS Code/JetBrains 插件）</b></td><td><code>config.json</code> 里加一个 <code>openai</code> provider，<code>baseURL: "https://api.66zyw.cn/v1"</code></td></tr>
+      <tr><td><b>Silicon / 各类前端</b></td><td>选择「自定义 / OpenAI 格式」，Base URL 同上</td></tr>
+    </table>
+
+    <h2 id="s5">5. 连通性测试（curl）</h2>
+    <p><b>OpenAI 格式：</b></p>
+    <pre><code>curl https://api.66zyw.cn/v1/chat/completions \
+  -H "Authorization: Bearer sk-xxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.6",
+    "messages": [{"role": "user", "content": "用一句话介绍你自己"}]
+  }'</code></pre>
+    <p><b>Anthropic 格式（Claude）：</b></p>
+    <pre><code>curl https://api.66zyw.cn/v1/messages \
+  -H "Authorization: Bearer sk-xxxxxx" \
+  -H "Content-Type: application/json" \
+  -H "anthropic-version: 2023-06-01" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "max_tokens": 200,
+    "messages": [{"role": "user", "content": "用一句话介绍你自己"}]
+  }'</code></pre>
+    <p>返回正常 JSON 即说明密钥与地址都正确。</p>
+
+    <h2 id="s6">6. 常见问题</h2>
+    <p><b>Q1：提示 401 Unauthorized</b><br>密钥不对或未填；检查 <code>sk-</code> 前缀是否完整，是否被复制时多了空格。</p>
+    <p><b>Q2：提示模型不存在（model not found）</b><br>使用的模型名不在第 3.1 列表里。请改用本站支持的模型名。</p>
+    <p><b>Q3：Claude Code / 任何 Anthropic provider 报连接错误</b><br>确认设的是 <code>ANTHROPIC_BASE_URL=https://api.66zyw.cn</code>（<b>不带</b> <code>/v1</code>，客户端会自动补 <code>/v1/messages</code>），而不是 <code>/v1</code>。</p>
+    <p><b>Q4：Codex / OpenCode / MiMo Code / OpenClaw / Hermes Agent / Kilo Code / Cherry Studio / Qwen Code / CodeBuddy / Cline 等走 OpenAI 兼容协议的客户端报连接错误</b><br>确认 Base URL 是 <code>https://api.66zyw.cn/v1</code>（<b>带</b> <code>/v1</code>）。</p>
+    <p><b>Q5：计费/倍率看哪里</b><br>在控制台「用量 / 账单」查看令牌消耗；具体倍率取决于令牌绑定的分组。</p>
+
+    <h2 id="s7">7. 注意事项</h2>
+    <ul>
+      <li>🔒 <b>密钥保密</b>：<code>sk-</code> 密钥等同于你的账号额度，请勿公开到仓库、贴吧或前端代码。</li>
+      <li>💡 <b>先小流量测试</b>：新客户端首次使用，先用一次 curl 或单条请求验证连通，再正式投入工作流。</li>
+      <li>📊 <b>关注用量</b>：令牌可在控制台设置额度上限，避免意外超额。</li>
+      <li>🔄 <b>客户端版本差异</b>：各客户端配置项名称会随版本变化，本文给出的是当前主流写法；如字段名不符，以对应客户端 <code>help</code> / 官方文档为准。</li>
+      <li>🌐 <b>分组选择</b>：令牌创建时选择的分组决定走哪条上游与倍率，请与实际套餐一致。</li>
+    </ul>
+
+    <div class="footer">星辰 API（new-api）使用文档 · 最后更新 2026-07-19</div>
+  </main>
+</div>
+
+<script>
+  // 滚动/点击高亮当前章节
+  const links = Array.from(document.querySelectorAll('#toc a'));
+  const map = {};
+  links.forEach(a => { map[a.getAttribute('href').slice(1)] = a; });
+  const sections = Array.from(document.querySelectorAll('h2[id], h3[id], h4[id]'));
+  let ticking = false;
+  let lockedId = null;     // 点击后短暂锁定，避免滚动事件把高亮抢回去
+  let lockTimer = null;
+
+  function updateActive() {
+    ticking = false;
+    let id = lockedId;
+    if (!id) {
+      // 取「视口中心」最近的标题：底部章节即使滚不到顶部，在视口中可见也能正确高亮
+      const center = window.scrollY + window.innerHeight / 2;
+      let best = sections[0];
+      let bestDist = Infinity;
+      for (const s of sections) {
+        const d = Math.abs(s.offsetTop - center);
+        if (d < bestDist) { bestDist = d; best = s; }
+      }
+      id = best.id;
+    }
+    links.forEach(l => l.classList.remove('active'));
+    if (map[id]) map[id].classList.add('active');
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateActive);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // 点击目录：立即高亮目标项，并锁定一小段时间（覆盖锚点跳转引发的滚动高亮）
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      const id = link.getAttribute('href').slice(1);
+      links.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      lockedId = id;
+      clearTimeout(lockTimer);
+      lockTimer = setTimeout(() => { lockedId = null; }, 1500);
+    });
+  });
+
+  updateActive();
+</script>
+</body>
+</html>
